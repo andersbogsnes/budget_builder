@@ -1,0 +1,39 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "budget_builder"
+description = 'Create a budget from bank data'
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+keywords = []
+authors = [
+    { name = "Anders Bogsnes", email = "andersbogsnes@gmail.com" },
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Python :: Implementation :: PyPy",
+]
+dependencies = ["polars", "pydantic", "typer", "sqlalchemy", "rich"]
+version = "0.1.0"
+
+[project.optional-dependencies]
+dev = ["pytest", "pytest-cov"]
+
+[project.urls]
+Documentation = "https://github.com/andersbogsnes/budget-builder#readme"
+Issues = "https://github.com/andersbogsnes/budget-builder/issues"
+Source = "https://github.com/andersbogsnes/budget-builder"
+
+
+
+[tool.coverage.run]
+branch = true
+parallel = true
+
