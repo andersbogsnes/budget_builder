@@ -49,3 +49,7 @@ def parse_row(row: CSVRow) -> TransactionRow:
     }
 
     return TransactionRow.parse_obj(row)
+
+
+def read_from_file(path: pathlib.Path) -> list[TransactionRow]:
+    return [parse_row(row) for row in load_csv(path)]

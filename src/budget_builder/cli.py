@@ -1,13 +1,15 @@
 import pathlib
+import sys
 
 import sqlalchemy as sa
 import typer
 from rich.console import Console
-from rich.prompt import Prompt
+from rich.prompt import Prompt, Confirm
 from sqlalchemy.orm import Session
 
-from budget_builder.categorize import Base, ClassificationRepo
-from budget_builder.data import load_csv, parse_row
+from budget_builder.categorize import ClassificationRepo, render_categories
+from budget_builder.data import read_from_file
+from budget_builder.db import Base
 
 INPUT_PATH = pathlib.Path(
     "/home/anders/projects/budget_builder/data/Fælleskonto_2022.csv"
@@ -18,43 +20,50 @@ engine = sa.create_engine(DB_URL)
 console = Console()
 
 app = typer.Typer()
-category = typer.Typer()
-categorize = typer.Typer()
 
+
+@app.callback()
 def create_repo(ctx: typer.Context):
-    with Session(engine) as session:
-        ctx
-
-app.add_typer(category, name="category")
-app.add_typer(categorize, name="categorize")
-
-@category.command()
-def add(name: str, is_fixed: bool = False):
-    pass
-
-
-@categorize.command()
-def categorize():
-    rows = load_csv(INPUT_PATH)
-    parsed_rows = map(parse_row, rows)
-
     Base.metadata.create_all(engine)
+    ctx.obj = ctx.with_resource(Session(engine))
 
-    with Session(engine) as session:
-        repo = ClassificationRepo(session)
-        repo.add_expenses(list(parsed_rows))
 
-        uncategorized = repo.get_uncategorized_expenses()
-        categories = repo.get_existing_categories()
-        existing_categories = {category.name: category for category in categories}
-        for expense in uncategorized:
-            console.print(f"Amount: {expense.amount}")
-            console.print(f"Description: {expense.description}")
-            choice = Prompt.ask("What category is the item?",
-                                console=console,
-                                choices=list(existing_categories))
-            repo.categorize(expense.id, existing_categories[choice])
+@app.command()
+def categorize(ctx: typer.Context):
+    repo = ClassificationRepo(ctx.obj)
+    parsed_rows = read_from_file(INPUT_PATH)
+
+    repo.add_expenses(parsed_rows)
+
+    categories = repo.get_categories()
+    category_ids = {category.id: category for category in categories}
+
+    for expense in repo.get_uncategorized_expenses():
+        console.print(expense)
+        console.print(render_categories(categories))
+
+        while True:
+            choice: str = Prompt.ask("What category is the item? ",
+                                     console=console)
+            match choice.lower():
+                case "new category" | "n":
+                    new_category_name = Prompt.ask("What's the category name?", console=console)
+                    is_fixed = Confirm.ask("Is it a fixed cost?", console=console)
+
+                    new_category = repo.add_category(new_category_name, is_fixed)
+                    categories.append(new_category)
+                    category_ids[new_category.id] = new_category
+                    break
+
+                case "quit" | "q":
+                    console.print("Quitting...")
+                    sys.exit(1)
+                case _ as choice if choice.isdigit() and int(choice) in category_ids:
+                    repo.set_category(expense.id, category_ids[int(choice)])
+                    break
+                case _ as e:
+                    console.print(f"Invalid selection: {e}")
 
 
 if __name__ == "__main__":
-    categorize()
+    app()
