@@ -70,9 +70,9 @@ class ClassificationRepo:
         self.session.commit()
         return expenses
 
-    def get_uncategorized_expenses(self) -> list[Expense]:
-        sql = sa.select(Expense).where(Expense.category_id.is_(None))
-        return list(self.session.execute(sql).scalars())
+    def get_uncategorized_expense(self) -> Expense:
+        sql = sa.select(Expense).where(Expense.category_id.is_(None)).limit(1)
+        return self.session.execute(sql).scalar_one_or_none()
 
     def set_category(self, expense_id: int, category: Category) -> None:
         if expense := self.session.get(Expense, expense_id):

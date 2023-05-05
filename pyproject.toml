@@ -31,7 +31,8 @@ Documentation = "https://github.com/andersbogsnes/budget-builder#readme"
 Issues = "https://github.com/andersbogsnes/budget-builder/issues"
 Source = "https://github.com/andersbogsnes/budget-builder"
 
-
+[project.scripts]
+budget = "budget_builder.cli:app"
 
 [tool.coverage.run]
 branch = true
