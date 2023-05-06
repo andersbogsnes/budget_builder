@@ -44,7 +44,11 @@ def loaded_data(parsed_rows: Generator[TransactionRow, None, None]) -> list[Tran
 
 
 def test_load_csv_has_correct_headers(parsed_rows: Generator[TransactionRow, None, None]):
-    assert list(next(parsed_rows).dict().keys()) == ["md5_hash", "date", "amount", "description"]
+    assert list(next(parsed_rows).dict().keys()) == ["md5_hash",
+                                                     "date",
+                                                     "amount",
+                                                     "description",
+                                                     "remaining"]
 
 
 def test_load_csv_contains_correct_number_of_lines(loaded_data: list[TransactionRow],

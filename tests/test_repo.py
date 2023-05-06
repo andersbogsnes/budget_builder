@@ -1,4 +1,5 @@
 import datetime
+import decimal
 import hashlib
 
 import pytest
@@ -42,19 +43,22 @@ def transactions() -> list[TransactionRow]:
             md5_hash=hashlib.md5("expense1".encode()).hexdigest(),
             date=datetime.date(year=2022, month=4, day=11),
             description="Cleaning Angel",
-            amount=-1787.50,
+            amount=decimal.Decimal("-1787.50"),
+            remaining=decimal.Decimal("10000")
         ),
         TransactionRow(
             md5_hash=hashlib.md5("expense2".encode()).hexdigest(),
             date=datetime.date(year=2022, month=4, day=11),
             description="Babysitter",
-            amount=-570.0,
+            amount=decimal.Decimal("570.0"),
+            remaining=decimal.Decimal("1000")
         ),
         TransactionRow(
             md5_hash=hashlib.md5("expense3".encode()).hexdigest(),
             date=datetime.date(year=2022, month=5, day=6),
             description="Babysitter",
-            amount=-600
+            amount=decimal.Decimal("-600"),
+            remaining=decimal.Decimal('120000')
         )
     ]
 

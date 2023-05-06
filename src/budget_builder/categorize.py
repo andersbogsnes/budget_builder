@@ -22,7 +22,7 @@ def render_categories(categories: list[Category]) -> Group:
 
     return Group(
         Rule("[bold green]Existing Categories"),
-        Align(Group(table, "(n) New Category\n(q) Quit"), align='center'),
+        Align(Group(table, "(n) New Category\n(q) Quit"), align="center"),
     )
 
 
@@ -56,12 +56,7 @@ class ClassificationRepo:
     def add_expenses(self, expenses: list[TransactionRow]):
         existing_expenses = self._get_existing_hashes()
         expenses = [
-            Expense(
-                md5_hash=expense.md5_hash,
-                date=expense.date,
-                amount=expense.amount,
-                description=expense.description,
-            )
+            Expense(**expense.dict())
             for expense in expenses
             if expense.md5_hash not in existing_expenses
         ]
@@ -76,10 +71,11 @@ class ClassificationRepo:
 
     def set_category(self, expense_id: int, category: Category) -> None:
         if expense := self.session.get(Expense, expense_id):
-            sql = (sa.update(Expense)
-                   .where(Expense.description == expense.description)
-                   .where(Expense.category_id.is_(None))
-                   .values(category_id=category.id)
-                   )
+            sql = (
+                sa.update(Expense)
+                .where(Expense.description == expense.description)
+                .where(Expense.category_id.is_(None))
+                .values(category_id=category.id)
+            )
             self.session.execute(sql)
             self.session.commit()

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import datetime
 import decimal
 
@@ -16,9 +18,7 @@ class Category(Base):
     name: Mapped[str] = mapped_column(unique=True)
     is_fixed_cost: Mapped[bool]
 
-    expenses: Mapped[list["Expense"]] = relationship(
-        "Expense", back_populates="category"
-    )
+    expenses: Mapped[list[Expense]] = relationship("Expense", back_populates="category")
 
 
 class Expense(Base):
@@ -29,6 +29,7 @@ class Expense(Base):
     date: Mapped[datetime.date]
     amount: Mapped[decimal.Decimal]
     description: Mapped[str]
+    remaining: Mapped[decimal.Decimal]
     category_id: Mapped[int | None] = mapped_column(sa.ForeignKey("categories.id"))
 
     category: Mapped[Category] = relationship(
@@ -37,4 +38,8 @@ class Expense(Base):
 
     def __rich__(self) -> Panel:
         return Panel(
-            Text(f"Description: {self.description}\nAmount: {self.amount:,.2f}", justify='center'))
+            Text(
+                f"Date: {self.date} Description: {self.description}\nAmount: {self.amount:,.2f}",
+                justify="center",
+            )
+        )

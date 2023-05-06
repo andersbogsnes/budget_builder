@@ -1,5 +1,6 @@
 import csv
 import datetime
+import decimal
 import hashlib
 import pathlib
 import typing
@@ -10,8 +11,9 @@ from pydantic import BaseModel
 class TransactionRow(BaseModel):
     md5_hash: str
     date: datetime.date
-    amount: float
+    amount: decimal.Decimal
     description: str
+    remaining: decimal.Decimal
 
     def __str__(self):
         return (
@@ -21,11 +23,7 @@ class TransactionRow(BaseModel):
 
 CSVRow = typing.TypedDict(
     "CSVRow",
-    {
-        "Bogføringsdato": str,
-        "Beløb": str,
-        "Beskrivelse": str,
-    },
+    {"Bogføringsdato": str, "Beløb": str, "Beskrivelse": str, "Saldo": str},
 )
 
 
@@ -41,11 +39,12 @@ def load_csv(path: pathlib.Path) -> typing.Generator[CSVRow, None, None]:
 def parse_row(row: CSVRow) -> TransactionRow:
     row = {
         "md5_hash": hashlib.md5(
-            f"{row['Bogføringsdato'] + row['Beløb'] + row['Beskrivelse']}".encode()
+            f"{row['Bogføringsdato'] + row['Beløb'] + row['Beskrivelse'] + row['Saldo']}".encode()
         ).hexdigest(),
         "date": row["Bogføringsdato"].replace("/", "-"),
         "amount": row["Beløb"].replace(",", "."),
         "description": row["Beskrivelse"],
+        "remaining": row["Saldo"].replace(",", "."),
     }
 
     return TransactionRow.parse_obj(row)

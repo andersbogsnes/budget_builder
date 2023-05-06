@@ -42,11 +42,12 @@ def categorize(ctx: typer.Context, input_file: pathlib.Path):
         console.print(expense)
         console.print(render_categories(categories))
 
-        choice: str = Prompt.ask("What category is the item? ",
-                                 console=console)
+        choice: str = Prompt.ask("What category is the item? ", console=console)
         match choice.lower():
             case "new category" | "n":
-                new_category_name = Prompt.ask("What's the category name?", console=console)
+                new_category_name = Prompt.ask(
+                    "What's the category name?", console=console
+                )
                 is_fixed = Confirm.ask("Is it a fixed cost?", console=console)
 
                 new_category = repo.add_category(new_category_name, is_fixed)
