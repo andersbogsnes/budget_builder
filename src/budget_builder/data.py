@@ -41,7 +41,10 @@ def parse_row(row: CSVRow) -> TransactionRow:
         "md5_hash": hashlib.md5(
             f"{row['Bogføringsdato'] + row['Beløb'] + row['Beskrivelse'] + row['Saldo']}".encode()
         ).hexdigest(),
-        "date": row["Bogføringsdato"].replace("/", "-"),
+        "date": (row["Bogføringsdato"]
+                 .replace("/", "-")
+                 .replace('Reserveret',
+                          datetime.date.today().strftime('%Y-%m-%d'))),
         "amount": row["Beløb"].replace(",", "."),
         "description": row["Beskrivelse"],
         "remaining": row["Saldo"].replace(",", "."),
